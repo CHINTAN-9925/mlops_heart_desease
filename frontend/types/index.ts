@@ -17,11 +17,13 @@ export interface PredictionInput {
 export interface PredictionResult {
   prediction: 0 | 1;
   probability: number;
+  label: string;
 }
 
 export interface HistoryRecord {
   input: PredictionInput;
   prediction: 0 | 1;
   probability: number;
+  label: string;
   timestamp: string;
 }

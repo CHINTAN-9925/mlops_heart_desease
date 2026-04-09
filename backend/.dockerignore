@@ -1,0 +1,6 @@
+.venv
+__pycache__
+*.pyc
+heart.csv
+.env
+.DS_Store

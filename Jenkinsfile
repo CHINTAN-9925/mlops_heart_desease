@@ -13,15 +13,26 @@ pipeline {
             }
         }
 
-        stage('Build Images') {
-            steps {
-                sh 'docker compose build --no-cache'
+        // Build backend and frontend images in parallel to save time
+        stage('Build') {
+            parallel {
+
+                stage('Build Backend') {
+                    steps {
+                        sh 'docker compose build --no-cache backend'
+                    }
+                }
+
+                stage('Build Frontend') {
+                    steps {
+                        sh 'docker compose build --no-cache frontend'
+                    }
+                }
             }
         }
 
         stage('Test Backend') {
             steps {
-                // Spin up only what the health check needs, then tear down
                 sh '''
                     docker compose up -d mongo backend
                     echo "Waiting for backend to be ready..."
@@ -34,11 +45,52 @@ pipeline {
                         sleep 3
                     done
                     docker compose exec -T backend curl -sf http://localhost:5001/health
+                    echo "Backend test passed."
                 '''
             }
             post {
                 always {
                     sh 'docker compose stop backend mongo || true'
+                }
+            }
+        }
+
+        stage('Test Frontend') {
+            steps {
+                // Frontend depends on backend+mongo being up
+                sh '''
+                    docker compose up -d mongo backend frontend
+                    echo "Waiting for frontend to be ready..."
+                    for i in $(seq 1 20); do
+                        STATUS=$(docker compose exec -T frontend \
+                            node -e "
+                                const h = require('http');
+                                h.get('http://localhost:3000', (r) => {
+                                    process.stdout.write(String(r.statusCode));
+                                    process.exit(r.statusCode < 400 ? 0 : 1);
+                                }).on('error', () => process.exit(1));
+                            " 2>/dev/null || echo "err")
+                        if [ "$STATUS" != "err" ] && [ "$STATUS" -lt 400 ] 2>/dev/null; then
+                            echo "Frontend is healthy (HTTP $STATUS)."
+                            break
+                        fi
+                        echo "  attempt $i/20 — retrying in 5s..."
+                        sleep 5
+                    done
+                    docker compose exec -T frontend \
+                        node -e "
+                            const h = require('http');
+                            h.get('http://localhost:3000', (r) => {
+                                if (r.statusCode < 400) { process.exit(0); }
+                                else { process.exit(1); }
+                            }).on('error', () => process.exit(1));
+                        "
+                    echo "Frontend test passed."
+                '''
+            }
+            post {
+                always {
+                    sh 'docker compose stop frontend backend mongo || true'
                 }
             }
         }

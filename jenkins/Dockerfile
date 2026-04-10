@@ -23,6 +23,10 @@ RUN apt-get update && \
 # Allow jenkins user to use the Docker socket mounted from the host
 RUN groupadd -f docker && usermod -aG docker jenkins
 
+# Fix Docker socket permissions on macOS where /var/run/docker.sock is owned by root
+RUN printf '#!/bin/sh\nchmod 666 /var/run/docker.sock\nexec "$@"\n' > /entrypoint.sh \
+    && chmod +x /entrypoint.sh
+
 USER jenkins
 
 # Pre-install suggested plugins (runs on first boot)

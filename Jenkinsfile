@@ -3,6 +3,9 @@ pipeline {
 
     environment {
         COMPOSE_PROJECT_NAME = 'mlops_heart'
+        // Docker Desktop on macOS installs docker at /usr/local/bin (Intel) or
+        // /opt/homebrew/bin (Apple Silicon). Both are added so it works on either.
+        PATH = "/usr/local/bin:/opt/homebrew/bin:${env.PATH}"
     }
 
     stages {

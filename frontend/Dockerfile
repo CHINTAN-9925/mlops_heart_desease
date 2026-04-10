@@ -1,8 +1,8 @@
 # ── Stage 1: Install dependencies ────────────────────────────────────────────
-FROM node:20-alpine AS deps
+FROM node:20-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+RUN npm ci --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000
 
 # ── Stage 2: Build ────────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
@@ -14,7 +14,7 @@ COPY . .
 ARG BACKEND_URL=http://backend:5001
 ENV BACKEND_URL=${BACKEND_URL}
 
-RUN npm run build
+RUN mkdir -p public && npm run build
 
 # ── Stage 3: Production runner ────────────────────────────────────────────────
 FROM node:20-alpine AS runner

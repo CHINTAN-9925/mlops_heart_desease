@@ -198,11 +198,16 @@ export default function Home() {
                       {f.label}
                       {'unit' in f && (
                         <span style={{
-                          display: 'inline-block', marginLeft: 6,
-                          fontSize: 10, fontWeight: 600, color: '#fff',
-                          background: group.accent,
-                          padding: '1px 6px', borderRadius: 99,
-                          opacity: 0.8,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginLeft: 6,
+                          fontSize: 10,
+                          fontWeight: 700,
+                          color: group.accent,
+                          background: `${group.accent}20`,
+                          padding: '2px 8px',
+                          borderRadius: 999,
                         }}>
                           {f.unit}
                         </span>

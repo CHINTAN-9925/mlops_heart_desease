@@ -2,7 +2,7 @@
 FROM node:20-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000
+RUN npm ci
 
 # ── Stage 2: Build ────────────────────────────────────────────────────────────
 FROM node:20-alpine AS builder
@@ -14,7 +14,7 @@ COPY . .
 ARG BACKEND_URL=http://backend:5001
 ENV BACKEND_URL=${BACKEND_URL}
 
-RUN mkdir -p public && npm run build
+RUN npm run build
 
 # ── Stage 3: Production runner ────────────────────────────────────────────────
 FROM node:20-alpine AS runner
@@ -26,5 +26,10 @@ COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./
 COPY --from=deps    /app/node_modules ./node_modules
 
+# Entrypoint copies /.next/static → /shared (nginx-shared volume) then starts Next.js
+COPY docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
+
 EXPOSE 3000
+ENTRYPOINT ["sh", "docker-entrypoint.sh"]
 CMD ["npm", "start"]

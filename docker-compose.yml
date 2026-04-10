@@ -3,22 +3,21 @@ services:
   mongo:
     image: mongo:7
     restart: unless-stopped
-    ports:
-      - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    # port not exposed — only reachable internally
 
   backend:
     build:
       context: ./backend
     restart: unless-stopped
-    ports:
-      - "5001:5001"
     environment:
       - MONGO_URI=mongodb://mongo:27017
       - PORT=5001
     depends_on:
       - mongo
+    # scale to multiple replicas:  docker compose up --scale backend=2
+    # ip_hash in nginx pins each client IP to one replica
 
   frontend:
     build:
@@ -26,12 +25,25 @@ services:
       args:
         BACKEND_URL: http://backend:5001
     restart: unless-stopped
-    ports:
-      - "3000:3000"
     environment:
       - BACKEND_URL=http://backend:5001
+    volumes:
+      - nextjs_static:/shared   # entrypoint copies .next/static here at startup
     depends_on:
+      - backend
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"                 # single public entry point
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - nextjs_static:/shared:ro
+    depends_on:
+      - frontend
       - backend
 
 volumes:
   mongo_data:
+  nextjs_static:

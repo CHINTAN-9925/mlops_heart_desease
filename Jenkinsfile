@@ -40,14 +40,17 @@ pipeline {
                     docker compose up -d mongo backend
                     echo "Waiting for backend to be ready..."
                     for i in $(seq 1 15); do
-                        if docker compose exec -T backend curl -sf http://localhost:5001/health > /dev/null 2>&1; then
+                        if docker compose exec -T backend python -c \
+                            "import urllib.request; urllib.request.urlopen('http://localhost:5001/health')" \
+                            > /dev/null 2>&1; then
                             echo "Backend is healthy."
                             break
                         fi
                         echo "  attempt $i/15 — retrying in 3s..."
                         sleep 3
                     done
-                    docker compose exec -T backend curl -sf http://localhost:5001/health
+                    docker compose exec -T backend python -c \
+                        "import urllib.request; urllib.request.urlopen('http://localhost:5001/health')"
                     echo "Backend test passed."
                 '''
             }

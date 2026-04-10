@@ -22,13 +22,13 @@ pipeline {
 
                 stage('Build Backend') {
                     steps {
-                        sh 'docker compose build --no-cache backend'
+                        sh 'docker compose build backend'
                     }
                 }
 
                 stage('Build Frontend') {
                     steps {
-                        sh 'docker compose build --no-cache frontend'
+                        sh 'docker compose build frontend'
                     }
                 }
             }

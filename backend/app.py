@@ -77,6 +77,8 @@ def predict():
     for field in REQUIRED_FIELDS:
         if field not in body:
             return jsonify({"error": f"Missing field: '{field}'"}), 400
+        if not isinstance(body[field], (int, float)):
+            return jsonify({"error": f"Field '{field}' must be numeric"}), 400
 
     try:
         df = pd.DataFrame([body])

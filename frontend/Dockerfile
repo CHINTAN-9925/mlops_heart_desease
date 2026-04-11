@@ -2,6 +2,8 @@
 FROM node:20-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
+# runs npm ci (clean install — exact versions from    
+#   lockfile)
 RUN npm ci
 
 # ── Stage 2: Build ────────────────────────────────────────────────────────────
@@ -26,10 +28,5 @@ COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/package.json ./
 COPY --from=deps    /app/node_modules ./node_modules
 
-# Entrypoint copies /.next/static → /shared (nginx-shared volume) then starts Next.js
-COPY docker-entrypoint.sh ./
-RUN chmod +x docker-entrypoint.sh
-
 EXPOSE 3000
-ENTRYPOINT ["sh", "docker-entrypoint.sh"]
 CMD ["npm", "start"]

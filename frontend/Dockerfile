@@ -2,6 +2,8 @@
 FROM node:20-slim AS deps
 WORKDIR /app
 COPY package.json package-lock.json ./
+# runs npm ci (clean install — exact versions from    
+#   lockfile)
 RUN npm ci
 
 # ── Stage 2: Build ────────────────────────────────────────────────────────────

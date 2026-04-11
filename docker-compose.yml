@@ -41,23 +41,5 @@ services:
       - frontend
       - backend
 
-  jenkins:
-    build:
-      context: ./jenkins
-    restart: unless-stopped
-    user: root
-    entrypoint: ["/entrypoint.sh"]
-    command: ["/usr/bin/tini", "--", "/usr/local/bin/jenkins.sh"]
-    ports:
-      - "8080:8080"   # Jenkins web UI
-      - "50000:50000" # Jenkins agent (JNLP) port
-    volumes:
-      - jenkins_home:/var/jenkins_home
-      # Mount host Docker socket so Jenkins can build/run containers
-      - /var/run/docker.sock:/var/run/docker.sock
-      # Mount the project root read-only as a fallback workspace reference
-      - .:/workspace:ro
-
 volumes:
   mongo_data:
-  jenkins_home:

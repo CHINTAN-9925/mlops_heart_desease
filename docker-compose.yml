@@ -60,3 +60,4 @@ services:
 
 volumes:
   mongo_data:
+  jenkins_home:

@@ -155,7 +155,7 @@ export default function Home() {
         background: 'linear-gradient(135deg, #0d0b1f 0%, #1a1638 55%, #0e0c20 100%)',
         borderBottom: '1.5px solid rgba(231,76,76,0.28)',
         padding: '0 36px',
-        height: 70,
+        height: 160,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',

@@ -128,7 +128,7 @@ export default function Home() {
       setHistory(updatedHistory);
       // Associate patient name with the newest record's timestamp (client-side only)
       if (updatedHistory.length > 0) {
-        const newest = updatedHistory[updatedHistory.length - 1];
+        const newest = updatedHistory[0];
         const newNames = { ...localNames, [newest.timestamp]: patientName.trim() };
         setLocalNames(newNames);
         try { localStorage.setItem(NAMES_KEY, JSON.stringify(newNames)); } catch {}
